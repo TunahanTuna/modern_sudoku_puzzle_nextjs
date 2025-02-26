@@ -139,7 +139,7 @@ export const isBoardSolved = (board: string[][]): boolean => {
       // Check row
       if (!board[i].includes(numStr)) return false;
       // Check column
-      if (!board.map(row => row[i]).includes(numStr)) return false;
+      if (!board.map((row) => row[i]).includes(numStr)) return false;
       // Check 3x3 box
       const boxRow = Math.floor(i / 3) * 3;
       const boxCol = Math.floor(i % 3) * 3;
@@ -165,22 +165,32 @@ export const getHint = (board: string[][]): [number, number, string] | null => {
   if (!board || !Array.isArray(board) || board.length !== 9) return null;
 
   // Create a copy of the current board
-  const boardCopy = board.map(row => [...row]);
-  
+  const boardCopy = board.map((row) => [...row]);
+
   // Try to solve the current board state
   if (!fillBoard(boardCopy)) return null;
 
-  // Find the first empty cell and return its solution
+  // Find all empty cells
+  const emptyCells: [number, number][] = [];
   for (let row = 0; row < 9; row++) {
     if (!board[row]) continue;
     for (let col = 0; col < 9; col++) {
       if (board[row][col] === "") {
-        // Verify the hint is valid
-        if (isValidMove(board, row, col, boardCopy[row][col])) {
-          return [row, col, boardCopy[row][col]];
-        }
+        emptyCells.push([row, col]);
       }
     }
+  }
+
+  // If there are no empty cells, return null
+  if (emptyCells.length === 0) return null;
+
+  // Select a random empty cell
+  const randomIndex = Math.floor(Math.random() * emptyCells.length);
+  const [row, col] = emptyCells[randomIndex];
+
+  // Verify the hint is valid
+  if (isValidMove(board, row, col, boardCopy[row][col])) {
+    return [row, col, boardCopy[row][col]];
   }
 
   return null;
