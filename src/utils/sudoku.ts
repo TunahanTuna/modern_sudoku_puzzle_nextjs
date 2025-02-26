@@ -56,69 +56,91 @@ const generateSolvedBoard = (): string[][] => {
 
 // Recursively fill the board
 const fillBoard = (board: string[][]): boolean => {
-  if (!board || !Array.isArray(board)) return false;
+  // Temel doğrulama kontrollerini ekleyelim
+  if (!board || !Array.isArray(board) || board.length !== 9) return false;
 
+  // Boş hücre bul
+  let emptyCell = findEmptyCell(board);
+  if (!emptyCell) return true; // Tüm hücreler dolu ise çözüm tamamlandı
+
+  const [row, col] = emptyCell;
+
+  // 1'den 9'a kadar sayıları rastgele sırayla dene
+  const numbers = shuffle([1, 2, 3, 4, 5, 6, 7, 8, 9]);
+
+  for (const num of numbers) {
+    const numStr = num.toString();
+
+    // Eğer sayı geçerliyse yerleştir ve devam et
+    if (isValidMove(board, row, col, numStr)) {
+      board[row][col] = numStr;
+
+      // Recursive olarak devam et
+      if (fillBoard(board)) {
+        return true;
+      }
+
+      // Eğer çözüm bulunamadıysa geri al
+      board[row][col] = "";
+    }
+  }
+
+  return false;
+};
+
+// Yardımcı fonksiyonlar
+const findEmptyCell = (board: string[][]): [number, number] | null => {
   for (let row = 0; row < 9; row++) {
     for (let col = 0; col < 9; col++) {
-      if (board[row]?.[col] === "") {
-        for (let num = 1; num <= 9; num++) {
-          const numStr = num.toString();
-          if (isValidMove(board, row, col, numStr)) {
-            board[row][col] = numStr;
-            if (fillBoard(board)) return true;
-            board[row][col] = "";
-          }
-        }
-        return false;
+      if (board[row][col] === "") {
+        return [row, col];
       }
     }
   }
-  return true;
+  return null;
 };
 
-// Create a puzzle by removing numbers from a solved board
+const shuffle = (array: number[]): number[] => {
+  const shuffled = [...array];
+  for (let i = shuffled.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+  }
+  return shuffled;
+};
+
 export const generatePuzzle = (
   difficulty: "easy" | "medium" | "hard"
 ): string[][] => {
-  const solvedBoard = generateSolvedBoard();
-  if (!solvedBoard)
-    return Array(9)
-      .fill(null)
-      .map(() => Array(9).fill(""));
+  // Boş board oluştur
+  const board = Array(9)
+    .fill(null)
+    .map(() => Array(9).fill(""));
 
-  const puzzle = solvedBoard.map((row) => [...row]);
+  // Tamamen çözülmüş board oluştur
+  fillBoard(board);
 
-  // Define number of cells to remove based on difficulty
+  // Zorluk seviyesine göre hücre sil
   const cellsToRemove =
     {
-      easy: 30, // Reduced from 40 to make it more playable
-      medium: 40, // Reduced from 50 to make it more balanced
-      hard: 50, // Reduced from 60 to ensure solvability
-    }[difficulty] || 30; // Default to easy if difficulty is somehow invalid
+      easy: 35, // Kolay seviye için daha az hücre sil
+      medium: 45,
+      hard: 55,
+    }[difficulty] || 35;
 
-  // Create a list of all positions
-  let positions = [];
-  for (let i = 0; i < 9; i++) {
-    for (let j = 0; j < 9; j++) {
-      positions.push([i, j]);
+  // Rastgele hücreleri sil
+  let count = 0;
+  while (count < cellsToRemove) {
+    const row = Math.floor(Math.random() * 9);
+    const col = Math.floor(Math.random() * 9);
+
+    if (board[row][col] !== "") {
+      board[row][col] = "";
+      count++;
     }
   }
 
-  // Shuffle positions
-  for (let i = positions.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [positions[i], positions[j]] = [positions[j], positions[i]];
-  }
-
-  // Remove numbers from positions
-  for (let i = 0; i < cellsToRemove; i++) {
-    if (positions[i]) {
-      const [row, col] = positions[i];
-      puzzle[row][col] = "";
-    }
-  }
-
-  return puzzle;
+  return board;
 };
 
 // Check if the board is solved

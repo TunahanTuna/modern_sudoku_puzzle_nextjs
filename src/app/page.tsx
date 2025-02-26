@@ -30,6 +30,11 @@ export default function Home() {
     hard: [],
   });
   const [remainingHints, setRemainingHints] = useState(3);
+  const [errorCells, setErrorCells] = useState<Set<string>>(new Set());
+  const [score, setScore] = useState(0);
+  const [combo, setCombo] = useState(0);
+  const [mistakes, setMistakes] = useState(0);
+  const MAX_MISTAKES = 5;
 
   const handleSuccessfulMove = useCallback(() => {
     if (!selectedCell) return;
@@ -48,6 +53,15 @@ export default function Home() {
     });
   }, []);
 
+  const calculateScore = (isCorrect: boolean): number => {
+    if (isCorrect) {
+      const basePoints = 10;
+      const comboMultiplier = Math.min(5, Math.floor(combo / 3)); // Her 3 doğru hareket için çarpan artışı (max 5x)
+      return basePoints * (comboMultiplier + 1);
+    }
+    return -5;
+  };
+
   const handleNumberInput = useCallback(
     (number: number) => {
       if (
@@ -63,6 +77,21 @@ export default function Home() {
         return;
       if (!board[row] || !initialBoard[row] || initialBoard[row][col]) return;
 
+      // Silme işlemi için - eğer aynı numaraya tekrar tıklanırsa sil
+      if (board[row][col] === number.toString()) {
+        const newBoard = board.map((r, i) =>
+          i === row ? r.map((cell, j) => (j === col ? "" : cell)) : r
+        );
+        setBoard(newBoard);
+        setErrorCells((prev) => {
+          const newErrors = new Set(prev);
+          newErrors.delete(`${row}-${col}`);
+          return newErrors;
+        });
+        return;
+      }
+
+      // Geçerli hamle kontrolü
       if (isValidMove(board, row, col, number.toString())) {
         const newBoard = board.map((r, i) =>
           i === row
@@ -70,13 +99,28 @@ export default function Home() {
             : r
         );
         setBoard(newBoard);
+        setErrorCells((prev) => {
+          const newErrors = new Set(prev);
+          newErrors.delete(`${row}-${col}`);
+          return newErrors;
+        });
+
+        // Combo ve skor güncellemesi
+        setCombo((prev) => prev + 1);
+        const earnedPoints = calculateScore(true);
+        setScore((prev) => prev + earnedPoints);
 
         handleSuccessfulMove();
         if (isBoardSolved(newBoard)) {
+          const completionBonus = 500; // Oyun tamamlama bonusu
+          const timeBonus = Math.max(0, 1000 - currentTime * 2); // Süreye bağlı bonus
+          const finalScore = score + completionBonus + timeBonus;
+
           handleGameCompletion();
           const newScore: GameScore = {
             difficulty,
             time: currentTime,
+            score: finalScore,
             date: new Date().toISOString(),
           };
           const updatedScores = {
@@ -92,6 +136,30 @@ export default function Home() {
           );
           setTimeout(() => setShowMenu(true), 2000);
         }
+      } else {
+        setCombo(0); // Combo sıfırlama
+        setMistakes((prev) => {
+          const newMistakes = prev + 1;
+          if (newMistakes >= MAX_MISTAKES) {
+            // Oyun sonu - çok fazla hata
+            setTimeout(() => setShowMenu(true), 2000);
+          }
+          return newMistakes;
+        });
+
+        setScore((prev) => Math.max(0, prev + calculateScore(false)));
+        // Hatalı hamle - hücreyi hatalı olarak işaretle
+        const newBoard = board.map((r, i) =>
+          i === row
+            ? r.map((cell, j) => (j === col ? number.toString() : cell))
+            : r
+        );
+        setBoard(newBoard);
+        setErrorCells((prev) => {
+          const newErrors = new Set(prev);
+          newErrors.add(`${row}-${col}`);
+          return newErrors;
+        });
       }
     },
     [
@@ -100,6 +168,11 @@ export default function Home() {
       initialBoard,
       handleSuccessfulMove,
       handleGameCompletion,
+      score,
+      currentTime,
+      difficulty,
+      highScores,
+      combo,
     ]
   );
 
@@ -143,6 +216,9 @@ export default function Home() {
     setGameStartTime(Date.now());
     setCurrentTime(0);
     setRemainingHints(3); // Reset hints when starting new game
+    setCombo(0);
+    setMistakes(0);
+    setScore(0); // Reset score when starting new game
   };
 
   const handleHint = useCallback(() => {
@@ -183,6 +259,21 @@ export default function Home() {
             difficulty={difficulty}
             highScores={highScores}
           />
+          <div className="mb-4 text-xl font-semibold space-y-2">
+            <div className="flex justify-center space-x-6">
+              <span>Skor: {score}</span>
+              <span>Combo: x{Math.floor(combo / 3) + 1}</span>
+              <span className="text-red-500">
+                Hatalar: {mistakes}/{MAX_MISTAKES}
+              </span>
+            </div>
+            <div className="text-center">
+              <span>
+                Süre: {Math.floor(currentTime / 60)}:
+                {(currentTime % 60).toString().padStart(2, "0")}
+              </span>
+            </div>
+          </div>
           <div className="bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm rounded-3xl shadow-2xl p-6 md:p-8 max-w-md md:max-w-2xl w-full mx-auto transition-all duration-300 hover:shadow-indigo-200/50 dark:hover:shadow-indigo-900/50 animate-scaleIn">
             <div className="grid grid-cols-9 gap-1 md:gap-1.5 bg-gray-100 dark:bg-gray-700 p-3 md:p-4 rounded-2xl transition-all duration-300">
               {board.map((row, i) =>
@@ -196,6 +287,8 @@ export default function Home() {
                       ${
                         initialBoard[i][j]
                           ? "font-bold text-gray-800 dark:text-gray-200"
+                          : errorCells.has(`${i}-${j}`)
+                          ? "text-red-600 dark:text-red-400"
                           : "text-indigo-600 dark:text-indigo-400"
                       }
                       ${
