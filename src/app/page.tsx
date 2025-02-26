@@ -29,6 +29,7 @@ export default function Home() {
     medium: [],
     hard: [],
   });
+  const [remainingHints, setRemainingHints] = useState(3);
 
   const handleSuccessfulMove = useCallback(() => {
     if (!selectedCell) return;
@@ -141,9 +142,15 @@ export default function Home() {
     setDifficulty(newDifficulty);
     setGameStartTime(Date.now());
     setCurrentTime(0);
+    setRemainingHints(3); // Reset hints when starting new game
   };
 
   const handleHint = useCallback(() => {
+    if (remainingHints <= 0) {
+      // You could add a toast/alert here to inform the user
+      return;
+    }
+
     const hint = getHint(board);
     if (hint) {
       const [row, col, value] = hint;
@@ -152,13 +159,14 @@ export default function Home() {
       );
       setBoard(newBoard);
       setSelectedCell([row, col]);
+      setRemainingHints((prev) => prev - 1);
       handleSuccessfulMove();
       if (isBoardSolved(newBoard)) {
         handleGameCompletion();
         setTimeout(() => setShowMenu(true), 2000);
       }
     }
-  }, [board, handleSuccessfulMove, handleGameCompletion]);
+  }, [board, remainingHints, handleSuccessfulMove, handleGameCompletion]);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800 flex flex-col items-center justify-center p-4 transition-colors duration-300">
@@ -230,9 +238,15 @@ export default function Home() {
               </button>
               <button
                 onClick={handleHint}
-                className="w-full md:w-auto px-6 py-3 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200 font-semibold rounded-xl hover:bg-gray-200 dark:hover:bg-gray-600 transform hover:scale-105 active:scale-95 transition-all duration-200 shadow-lg hover:shadow-gray-200/50 dark:hover:shadow-gray-900/50"
+                disabled={remainingHints <= 0}
+                className={`w-full md:w-auto px-6 py-3 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200 font-semibold rounded-xl transform transition-all duration-200 shadow-lg flex items-center justify-center gap-2
+                  ${
+                    remainingHints > 0
+                      ? "hover:bg-gray-200 dark:hover:bg-gray-600 hover:scale-105 active:scale-95 hover:shadow-gray-200/50 dark:hover:shadow-gray-900/50"
+                      : "opacity-50 cursor-not-allowed"
+                  }`}
               >
-                İpucu
+                İpucu ({remainingHints})
               </button>
             </div>
           </div>
