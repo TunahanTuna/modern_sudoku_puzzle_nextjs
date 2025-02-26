@@ -1,6 +1,7 @@
 export interface GameScore {
-  difficulty: "easy" | "medium" | "hard";
-  time: number; // in seconds
+  difficulty: string;
+  time: number;
+  score: number; // Add this line
   date: string;
 }
 
