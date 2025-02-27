@@ -1,6 +1,8 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
+import { useLanguage } from "../i18n/LanguageContext";
+import { useTranslation } from "../i18n/translations";
 import {
   generatePuzzle,
   isValidMove,
@@ -9,10 +11,13 @@ import {
 } from "../utils/sudoku";
 import GameMenu from "../components/GameMenu";
 import ScoreBoard from "../components/ScoreBoard";
+import LanguageSwitcher from "../components/LanguageSwitcher";
 import { HighScores, GameScore } from "../types/score";
 import confetti from "canvas-confetti";
 
 export default function Home() {
+  const { language } = useLanguage();
+  const t = useTranslation(language);
   const [showMenu, setShowMenu] = useState(true);
   const [board, setBoard] = useState<string[][]>([]);
   const [selectedCell, setSelectedCell] = useState<[number, number] | null>(
@@ -245,31 +250,27 @@ export default function Home() {
   }, [board, remainingHints, handleSuccessfulMove, handleGameCompletion]);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800 flex flex-col items-center justify-center p-4 transition-colors duration-300">
-      <h1 className="text-4xl md:text-5xl font-extrabold mb-8 bg-clip-text text-transparent bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 dark:from-indigo-400 dark:via-purple-400 dark:to-pink-400 filter drop-shadow-lg transform hover:scale-105 transition-all duration-300">
-        Modern Sudoku
-      </h1>
-
+    <main className="min-h-screen p-4">
+      <div className="absolute top-4 right-4">
+        <LanguageSwitcher />
+      </div>
       {showMenu ? (
         <GameMenu onStartGame={startNewGame} />
       ) : (
         <>
-          <ScoreBoard
-            currentTime={currentTime}
-            difficulty={difficulty}
-            highScores={highScores}
-          />
-          <div className="mb-4 text-xl font-semibold space-y-2">
-            <div className="flex justify-center space-x-6">
-              <span>Skor: {score}</span>
-              <span>Combo: x{Math.floor(combo / 3) + 1}</span>
-              <span className="text-red-500">
-                Hatalar: {mistakes}/{MAX_MISTAKES}
-              </span>
-            </div>
-            <div className="text-center">
+          <div className="fixed top-4 left-4 mb-4 text-xl font-semibold space-y-2 bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm rounded-xl p-4 shadow-lg">
+            <div className="flex flex-col space-y-2">
               <span>
-                Süre: {Math.floor(currentTime / 60)}:
+                {t("score.score")}: {score}
+              </span>
+              <span>
+                {t("game.combo")}: x{Math.floor(combo / 3) + 1}
+              </span>
+              <span className="text-red-500">
+                {t("score.mistakes")}: {mistakes}/{MAX_MISTAKES}
+              </span>
+              <span>
+                {t("score.time")}: {Math.floor(currentTime / 60)}:
                 {(currentTime % 60).toString().padStart(2, "0")}
               </span>
             </div>
@@ -327,7 +328,7 @@ export default function Home() {
                 onClick={() => setShowMenu(true)}
                 className="w-full md:w-auto px-6 py-3 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 text-white font-semibold rounded-xl hover:from-indigo-600 hover:via-purple-600 hover:to-pink-600 transform hover:scale-105 active:scale-95 transition-all duration-200 shadow-lg hover:shadow-indigo-200/50 dark:hover:shadow-indigo-900/50"
               >
-                Yeni Oyun
+                {t("game.newGame")}
               </button>
               <button
                 onClick={handleHint}
@@ -339,12 +340,12 @@ export default function Home() {
                       : "opacity-50 cursor-not-allowed"
                   }`}
               >
-                İpucu ({remainingHints})
+                {t("game.hint")} ({remainingHints})
               </button>
             </div>
           </div>
         </>
       )}
-    </div>
+    </main>
   );
 }

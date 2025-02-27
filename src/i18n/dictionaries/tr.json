@@ -1,0 +1,29 @@
+{
+  "game": {
+    "title": "Sudoku Bulmaca",
+    "newGame": "Yeni Oyun",
+    "pause": "Duraklat",
+    "resume": "Devam Et",
+    "check": "Çözümü Kontrol Et",
+    "solve": "Bulmacayı Çöz",
+    "hint": "İpucu",
+    "combo": "Kombo",
+    "difficulty": {
+      "label": "Zorluk",
+      "easy": "Kolay",
+      "medium": "Orta",
+      "hard": "Zor"
+    }
+  },
+
+  "score": {
+    "time": "Süre",
+    "mistakes": "Hatalar",
+    "score": "Puan"
+  },
+  "messages": {
+    "correct": "Tebrikler! Çözüm doğru!",
+    "incorrect": "Çözümünüzde bazı hatalar var.",
+    "paused": "Oyun duraklatıldı"
+  }
+}

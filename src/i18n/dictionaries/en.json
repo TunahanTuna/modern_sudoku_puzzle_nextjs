@@ -1,0 +1,23 @@
+{
+  "game": {
+    "title": "Sudoku Puzzle",
+    "newGame": "New Game",
+    "pause": "Pause",
+    "resume": "Resume",
+    "check": "Check Solution",
+    "solve": "Solve Puzzle",
+    "hint": "Hint",
+    "combo": "Combo",
+    "difficulty": {
+      "label": "Difficulty",
+      "easy": "Easy",
+      "medium": "Medium",
+      "hard": "Hard"
+    }
+  },
+  "score": {
+    "time": "Time",
+    "mistakes": "Mistakes",
+    "score": "Score"
+  }
+}
