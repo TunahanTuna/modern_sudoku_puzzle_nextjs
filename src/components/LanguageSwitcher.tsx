@@ -18,7 +18,7 @@ export default function LanguageSwitcher() {
       aria-label={`Switch to ${language === 'tr' ? 'English' : 'Turkish'}`}
     >
       <Image
-        src="/globe.svg"
+        src="./globe.svg"
         alt="Language"
         width={24}
         height={24}
