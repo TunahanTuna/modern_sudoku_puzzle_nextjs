@@ -2,6 +2,8 @@ export const tr = {
   game: {
     title: 'Sudoku Oyunu',
     newGame: 'Yeni Oyun',
+    showSolution: 'Çözümü Göster',
+    hint: 'İpucu',
     difficulty: {
       label: 'Zorluk',
       easy: 'Kolay',

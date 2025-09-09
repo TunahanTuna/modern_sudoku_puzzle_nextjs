@@ -2,6 +2,7 @@
   "game": {
     "title": "Sudoku Bulmaca",
     "newGame": "Yeni Oyun",
+    "showSolution": "Çözümü Göster",
     "pause": "Duraklat",
     "resume": "Devam Et",
     "check": "Çözümü Kontrol Et",

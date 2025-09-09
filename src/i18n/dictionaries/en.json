@@ -2,6 +2,7 @@
   "game": {
     "title": "Sudoku Puzzle",
     "newGame": "New Game",
+    "showSolution": "Show Solution",
     "pause": "Pause",
     "resume": "Resume",
     "check": "Check Solution",

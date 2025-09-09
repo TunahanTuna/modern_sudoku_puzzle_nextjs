@@ -217,3 +217,18 @@ export const getHint = (board: string[][]): [number, number, string] | null => {
 
   return null;
 };
+
+// Solve the current board state
+export const solveBoard = (board: string[][]): string[][] | null => {
+  if (!board || !Array.isArray(board) || board.length !== 9) return null;
+
+  // Create a copy of the current board
+  const boardCopy = board.map((row) => [...row]);
+
+  // Try to solve the current board state
+  if (fillBoard(boardCopy)) {
+    return boardCopy;
+  }
+
+  return null;
+};

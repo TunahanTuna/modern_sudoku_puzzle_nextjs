@@ -2,6 +2,8 @@ export const en = {
   game: {
     title: 'Sudoku Game',
     newGame: 'New Game',
+    showSolution: 'Show Solution',
+    hint: 'Hint',
     difficulty: {
       label: 'Difficulty',
       easy: 'Easy',

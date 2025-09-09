@@ -8,6 +8,7 @@ import {
   isValidMove,
   isBoardSolved,
   getHint,
+  solveBoard,
 } from "../utils/sudoku";
 import GameMenu from "../components/GameMenu";
 import ScoreBoard from "../components/ScoreBoard";
@@ -249,6 +250,18 @@ export default function Home() {
     }
   }, [board, remainingHints, handleSuccessfulMove, handleGameCompletion]);
 
+  const handleShowSolution = useCallback(() => {
+    const solution = solveBoard(board);
+    if (solution) {
+      setBoard(solution);
+      // Oyunu tamamlanmış olarak işaretle
+      if (isBoardSolved(solution)) {
+        handleGameCompletion();
+        setTimeout(() => setShowMenu(true), 2000);
+      }
+    }
+  }, [board, handleGameCompletion]);
+
   return (
     <main className="min-h-screen p-4">
       <div className="absolute top-4 right-4">
@@ -292,21 +305,15 @@ export default function Home() {
                           ? "text-red-600 dark:text-red-400"
                           : "text-indigo-600 dark:text-indigo-400"
                       }
-                      ${
-                        selectedCell?.[0] === i && selectedCell?.[1] === j
+                      ${selectedCell?.[0] === i && selectedCell?.[1] === j
                           ? "bg-indigo-100 dark:bg-indigo-700/70 ring-2 ring-indigo-500 shadow-lg scale-105 animate-pulse"
-                          : "bg-white/80 dark:bg-gray-800/80"
-                      }
-                      ${
-                        (i + 1) % 3 === 0 && i !== 8
-                          ? "border-b-2 border-gray-400/50"
-                          : ""
-                      }
-                      ${
-                        (j + 1) % 3 === 0 && j !== 8
-                          ? "border-r-2 border-gray-400/50"
-                          : ""
-                      }
+                          : "bg-white/80 dark:bg-gray-800/80"}
+                      ${(i + 1) % 3 === 0 && i !== 8
+                          ? "border-b-2 border-indigo-500 dark:border-indigo-400"
+                          : ""}
+                      ${(j + 1) % 3 === 0 && j !== 8
+                          ? "border-r-2 border-indigo-500 dark:border-indigo-400"
+                          : ""}
                       hover:bg-indigo-50 dark:hover:bg-indigo-900/30
                       hover:scale-105
                       active:scale-95
@@ -329,6 +336,12 @@ export default function Home() {
                 className="w-full md:w-auto px-6 py-3 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 text-white font-semibold rounded-xl hover:from-indigo-600 hover:via-purple-600 hover:to-pink-600 transform hover:scale-105 active:scale-95 transition-all duration-200 shadow-lg hover:shadow-indigo-200/50 dark:hover:shadow-indigo-900/50"
               >
                 {t("game.newGame")}
+              </button>
+              <button
+                onClick={handleShowSolution}
+                className="w-full md:w-auto px-6 py-3 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200 font-semibold rounded-xl transform transition-all duration-200 shadow-lg flex items-center justify-center gap-2 hover:bg-gray-200 dark:hover:bg-gray-600 hover:scale-105 active:scale-95 hover:shadow-gray-200/50 dark:hover:shadow-gray-900/50"
+              >
+                {t("game.showSolution")}
               </button>
               <button
                 onClick={handleHint}
